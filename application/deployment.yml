@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    application: kitchensink
+  name: kitchensink
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      deployment: kitchensink
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        application: kitchensink
+        deployment: kitchensink
+      name: kitchensink
+    spec:
+      containers:
+      - env:
+        - name: DB_DATABASE
+          value: kitchensink
+        - name: DB_DRIVER
+          value: postgresql
+        - name: DB_JNDI
+          value: java:jboss/datasources/KitchensinkQuickstartDS
+        - name: DB_MAX_POOL_SIZE
+          value: "30"
+        - name: DB_MIN_POOL_SIZE
+          value: "10"
+        - name: DB_NONXA
+          value: "true"
+        - name: DB_PASSWORD
+          value: pguser
+        - name: DB_SERVICE_PREFIX_MAPPING
+          value: kitchensink-ds=DB
+        - name: DB_URL
+          value: jdbc:postgresql://postgresql:5432/kitchensink
+        - name: DB_USERNAME
+          value: pguser
+        - name: DISABLE_EMBEDDED_JMS_BROKER
+          value: "true"
+        - name: ENABLE_ACCESS_LOG
+          value: "true"
+        - name: JGROUPS_PING_PROTOCOL
+          value: dns.DNS_PING
+        - name: OPENSHIFT_DNS_PING_SERVICE_NAME
+          value: kitchensink-ping
+        - name: OPENSHIFT_DNS_PING_SERVICE_PORT
+          value: "8888"
+        - name: JGROUPS_CLUSTER_PASSWORD
+          value: password
+        - name: AUTO_DEPLOY_EXPLODED
+          value: "false"
+        - name: ENABLE_GENERATE_DEFAULT_DATASOURCE
+          value: "false"
+        name: kitchensink
+        image: image-registry.openshift-image-registry.svc:5000/myapp-dev/kitchensink:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8778
+          name: jolokia
+          protocol: TCP
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 8888
+          name: ping
+          protocol: TCP
+        resources:
+          limits:
+            memory: 512Mi
+        startupProbe:
+          failureThreshold: 27
+          initialDelaySeconds: 30
+          tcpSocket:
+            port: 8080
+        livenessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - /opt/eap/bin/livenessProbe.sh
+          initialDelaySeconds: 60
+        readinessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - /opt/eap/bin/readinessProbe.sh
+          initialDelaySeconds: 10
+      terminationGracePeriodSeconds: 75
