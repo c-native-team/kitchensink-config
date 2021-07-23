@@ -6,17 +6,22 @@ Manifest files for OpenShift GitOps.
 普通の権限のユーザで構わない。
 
 ```
-SOURCE_NAMESPACE=myapp-dev
-TARGET_NAMESPACE=myapp-staging
+SOURCE_NAMESPACE=kitchensink-dev
+TARGET_NAMESPACE=kitchensink-staging
 
 oc new-project ${TARGET_NAMESPACE}
 
+# Argo CDに実行許可を与える
 oc policy add-role-to-user admin \
   system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller
 
+# SOURCE_NAMESPACEで作成したイメージをpullする許可を与える
 oc policy add-role-to-group system:image-puller \
   system:serviceaccounts:$(oc project -q) \
   -n ${SOURCE_NAMESPACE}
+
+# EAPのクラスタリングが使うKUBE_PINGの許可を与える
+oc policy add-role-to-user view -z default
 
 oc new-app \
   postgresql-ephemeral \
@@ -29,27 +34,31 @@ oc new-app \
 
 # Argo CDのアプリケーションの設定
 
-cluster-admin権限のユーザで行う。
+以下はcluster-admin権限のユーザで行う。
 
-OperatorHubで"Red Hat OpenShift GitOps" (Red Hat公式のArgo CD) をインストールする。
+まず必要なソフトウェアとして以下のOperatorをOperatorHubからインストールする。
+
+- Red Hat OpenShift GitOps (Red Hat公式のArgo CD)
+- JBoss EAP
 
 Argo CDの管理コンソールのURLを調べる。
 
     oc get route openshift-gitops-server -n openshift-gitops
 
-adminユーザのパスワードを調べる。
+Argo CDの管理ユーザのパスワードを調べる。
 
     oc extract secret/openshift-gitops-cluster -n openshift-gitops --to=-
 
-管理コンソールにログインし、以下の設定でアプリケーションを作成する。
+上記で調べた管理コンソールに admin/<上記のパスワード> でログインし、
+以下の設定でアプリケーションを作成する。
 
 | 項目             | 値                                               | 備考                                                    |
 |------------------|--------------------------------------------------|---------------------------------------------------------|
-| Application Name | kitchensink-gitops-app                           | openshift-gitops名前空間に作成されるApplicationの名前。 |
+| Application Name | kitchensink-application                          | openshift-gitops名前空間に作成されるApplicationの名前。 |
 | Project          | default                                          | Argo CDのプロジェクト。固定でよい。                     |
 | Sync Policy      | Automatic                                        | "Prune Resources"と"Self Heal"にもチェックを入れる。    |
 | Repository URL   | https://github.com/onagano-rh/kitchensink-config | 自分の設定用リポジトリ (このリポジトリ)。               |
 | Revision         | main                                             | 使用するブランチまたはタグ。                            |
-| Path             | application                                      | マニフェストがあるディレクトリ。                        |
+| Path             | overlays/staging                                 | 使用するkustomization.yamlがあるディレクトリ。          |
 | Cluster URL      | https://kubernetes.default.svc                   | デプロイ先のクラスタ。固定でよい。                      |
-| Namespace        | myapp-staging                                    | 上記で作成したデプロイ先の名前空間。                    |
+| Namespace        | (TARGET_NAMESPACEと同じ値)                       | 上記で作成したデプロイ先の名前空間。                    |

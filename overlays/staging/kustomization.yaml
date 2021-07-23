@@ -1,0 +1,47 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../base/
+
+commonLabels:
+  application: kitchensink
+
+patchesJson6902:
+- target:
+    version: v1alpha1
+    kind: WildFlyServer
+    name: kitchensink-blue
+  patch: |-
+    - op: replace
+      path: /spec/applicationImage
+      value: image-registry.openshift-image-registry.svc:5000/kitchensink-dev/kitchensink:latest
+    - op: replace
+      path: /spec/replicas
+      value: 2
+
+- target:
+    version: v1alpha1
+    kind: WildFlyServer
+    name: kitchensink-green
+  patch: |-
+    - op: replace
+      path: /spec/applicationImage
+      value: image-registry.openshift-image-registry.svc:5000/kitchensink-dev/kitchensink:latest
+    - op: replace
+      path: /spec/replicas
+      value: 0
+
+- target:
+    version: v1
+    kind: Route
+    name: kitchensink
+  patch: |-
+    # Weight of kitchensink-blue
+    - op: replace
+      path: /spec/to/weight
+      value: 100
+    # Weight of kitchensink-green
+    - op: replace
+      path: /spec/alternateBackends/0/weight
+      value: 0

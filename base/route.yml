@@ -1,10 +1,6 @@
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  annotations:
-    description: Route for application's https service.
-  labels:
-    application: kitchensink
   name: kitchensink
 spec:
   tls:
@@ -12,4 +8,9 @@ spec:
     termination: edge
   to:
     kind: Service
-    name: kitchensink
+    name: kitchensink-blue-loadbalancer
+    weight: 100
+  alternateBackends:
+    - kind: Service
+      name: kitchensink-green-loadbalancer
+      weight: 0

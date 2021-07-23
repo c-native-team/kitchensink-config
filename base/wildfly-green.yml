@@ -1,0 +1,20 @@
+apiVersion: wildfly.org/v1alpha1
+kind: WildFlyServer
+metadata:
+  name: kitchensink-green
+spec:
+  applicationImage: image-to-be-replaced
+  replicas: 0
+  env:
+  - name: ENABLE_ACCESS_LOG
+    value: "true"
+  - name: DISABLE_EMBEDDED_JMS_BROKER
+    value: "true"
+  - name: JGROUPS_CLUSTER_PASSWORD
+    value: password
+  - name: AUTO_DEPLOY_EXPLODED
+    value: "false"
+  - name: ENABLE_GENERATE_DEFAULT_DATASOURCE
+    value: "false"
+  disableHTTPRoute: true
+  sessionAffinity: true
