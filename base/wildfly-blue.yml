@@ -16,5 +16,25 @@ spec:
     value: "false"
   - name: ENABLE_GENERATE_DEFAULT_DATASOURCE
     value: "false"
+  - name: DB_SERVICE_PREFIX_MAPPING
+    value: kitchensink-ds=DB
+  - name: DB_JNDI
+    value: java:jboss/datasources/KitchensinkQuickstartDS
+  - name: DB_DATABASE
+    value: kitchensink
+  - name: DB_USERNAME
+    value: pguser
+  - name: DB_PASSWORD
+    value: pguser
+  - name: DB_DRIVER
+    value: postgresql
+  - name: DB_NONXA
+    value: "true"
+  - name: DB_URL
+    value: 'jdbc:postgresql://postgresql:5432/kitchensink'
+  - name: DB_MIN_POOL_SIZE
+    value: "10"
+  - name: DB_MAX_POOL_SIZE
+    value: "30"
   disableHTTPRoute: true
   sessionAffinity: true
