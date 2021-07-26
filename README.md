@@ -23,12 +23,18 @@ oc policy add-role-to-group system:image-puller \
 # EAPのクラスタリングが使うKUBE_PINGの許可を与える
 oc policy add-role-to-user view -z default
 
+# アプリが使うDBの作成 (blue/green共通)
 oc new-app \
   postgresql-ephemeral \
   -p POSTGRESQL_USER=pguser \
   -p POSTGRESQL_PASSWORD=pguser \
   -p POSTGRESQL_DATABASE=kitchensink \
   -p POSTGRESQL_VERSION=12-el8
+
+# デプロイエラーを防ぐため、現在指定されているタグをあらかじめ作成しておく
+# タグは overlays/staging/kustomization.yaml の現在の値を見て確認する
+oc tag kitchensink:latest kitchensink:<tag-blue> -n ${SOURCE_NAMESPACE}
+oc tag kitchensink:latest kitchensink:<tag-green> -n ${SOURCE_NAMESPACE}
 
 ```
 
