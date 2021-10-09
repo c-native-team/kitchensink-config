@@ -40,7 +40,7 @@ patchesJson6902:
     # Weight of kitchensink-blue
     - op: replace
       path: /spec/to/weight
-      value: 100
+      value: 50
     # Weight of kitchensink-green
     - op: replace
       path: /spec/alternateBackends/0/weight
