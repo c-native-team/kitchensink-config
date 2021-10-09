@@ -18,7 +18,7 @@ patchesJson6902:
       value: image-registry.openshift-image-registry.svc:5000/kitchensink-dev/kitchensink:547993e
     - op: replace
       path: /spec/replicas
-      value: 2
+      value: 1
 
 - target:
     version: v1alpha1
